@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test de usuario · Tempo</title>
+<style>
+:root{--ink:#241f3d;--mut:#6d6890;--bg:#f4f3fb;--card:#fff;--line:#e4e1f3;--acc:#5b4bdb;--ok:#2fa36b;--warn:#e0a21a;--bad:#d64f5e}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer;color:inherit}
+.btn{display:inline-block;padding:.75em 1.3em;border-radius:12px;border:0;background:var(--acc);color:#fff;font-weight:700;text-decoration:none}
+.btn.alt{background:#fff;color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+
+/* ---------- Portada ---------- */
+#landing{max-width:720px;margin:0 auto;padding:48px 20px}
+#landing h1{font-size:2rem;margin:.2em 0}
+#landing li{margin:.4em 0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}
+.note{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 16px;color:var(--mut);font-size:.92rem}
+
+/* ---------- Panel del moderador ---------- */
+#mView{max-width:1180px;margin:0 auto;padding:16px}
+.mhead{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mhead h1{font-size:1.3rem;margin:0}
+.st{font-size:.85rem;padding:.25em .8em;border-radius:99px;background:#ececf3;color:var(--mut)}
+.st.on{background:#dff5ea;color:var(--ok)}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.tk{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.tk.act{border-color:var(--acc);box-shadow:0 0 0 4px #5b4bdb22}
+.tk header{display:flex;gap:12px;align-items:flex-start}
+.n{flex:0 0 32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700}
+.q{margin:0;font-size:1.1rem;font-weight:600}
+.hint{margin:.4em 0 .4em 44px;color:var(--mut);font-size:.88rem}
+.ctl,.res,.seq{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.tk button,.box button{border:2px solid var(--line);background:#fff;border-radius:10px;padding:.4em .9em;font-weight:600}
+.tk button.on,.box button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tk button[data-r=ok].on{background:var(--ok);border-color:var(--ok)}
+.tk button[data-r=help].on{background:var(--warn);border-color:var(--warn)}
+.tk button[data-r=fail].on{background:var(--bad);border-color:var(--bad)}
+.tm{font:700 1.2rem ui-monospace,monospace;min-width:3.4em}
+.goal{color:var(--ok);font-weight:700;font-size:.9rem}
+.stat,.lbl{color:var(--mut);font-size:.88rem}
+textarea,input.f{width:100%;font:inherit;border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)}
+textarea{min-height:56px;resize:vertical}
+aside{position:sticky;top:12px}
+.box{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.box h3{margin:0 0 8px;font-size:1rem}
+.log{max-height:230px;overflow:auto;font:.8rem ui-monospace,monospace;color:var(--mut)}
+.log div{padding:2px 0;border-bottom:1px dashed var(--line)}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi span{background:var(--bg);border-radius:10px;padding:6px 10px;font-size:.88rem}
+.row2{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Prototipo (app Tempo) ---------- */
+#pView{min-height:100vh;display:grid;place-items:center;padding:16px;background:#e7e4f5}
+.phone{position:relative;width:390px;height:800px;max-height:calc(100vh - 32px);background:#15111f;border-radius:40px;
+  box-shadow:0 0 0 10px #0d0a14,0 24px 60px #2b1f5a55;overflow:hidden;color:#f4f0ff;font-size:15px}
+@media(max-width:520px){#pView{padding:0;display:block}.phone{width:100vw;height:100dvh;max-height:none;border-radius:0;box-shadow:none}}
+#app{position:absolute;inset:0;display:flex;flex-direction:column}
+.phone button{color:inherit;border:0;background:none}
+.sbar{display:flex;justify-content:space-between;padding:12px 24px 4px;font-size:12px;font-weight:700;color:#cfc8e6}
+.view{flex:1;overflow-y:auto;padding:4px 18px 24px;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 6px}
+.top h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.av{width:40px;height:40px;border-radius:50%;background:#2b2342!important;font-size:20px;display:grid;place-items:center;flex:none}
+.phone h2{font-size:17px;margin:20px 0 10px}
+.hs{display:flex;gap:12px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}
+.card{flex:0 0 132px;text-align:left;padding:0;display:flex;flex-direction:column;justify-content:flex-start;align-self:flex-start}
+.card b,.tx b{display:block;font-size:14px;margin-top:6px;line-height:1.25}
+.card small,.tx small{display:block;color:#a79fc2;font-size:12px}
+.art{display:grid;place-items:center;aspect-ratio:1;width:100%;border-radius:14px;font-style:normal;font-size:38px;color:#ffffffd9;
+  background:linear-gradient(135deg,hsl(var(--h) 75% 62%),hsl(calc(var(--h) + 50) 70% 45%))}
+.art.sm{width:46px;font-size:20px;border-radius:10px;flex:none}
+.art.round{border-radius:50%}
+.art.big{width:78%;margin:14px auto;font-size:84px;border-radius:22px}
+.row{display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer}
+.row .tx{flex:1;min-width:0}
+.row .tx b{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.now .tx b{color:#ff8fa8}
+.dots{font-size:22px;padding:4px 10px}
+.sb{display:flex;align-items:center;gap:10px;background:#2b2342;border-radius:14px;padding:11px 14px;margin:8px 0 6px}
+.sb input{flex:1;background:none;border:0;outline:0;color:#fff;font:inherit}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{height:80px;border-radius:14px;text-align:left;padding:12px;font-weight:700;font-size:16px;
+  background:linear-gradient(135deg,hsl(var(--h) 70% 55%),hsl(calc(var(--h) + 40) 65% 42%))!important}
+.tabs{display:flex;gap:8px;margin:10px 0}
+.tabs button{padding:8px 16px;border-radius:99px;background:#2b2342;font-weight:600;font-size:14px}
+.tabs button.on{background:linear-gradient(90deg,#ff6f91,#ffb86b);color:#2a1020}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{background:#2b2342;border-radius:99px;padding:9px 16px;font-weight:600}
+.empty,.sub{color:#a79fc2;margin:14px 0}
+.mini{display:flex;align-items:center;gap:10px;margin:0 10px 6px;padding:8px 10px;border-radius:16px;background:#2b2342;cursor:pointer}
+.mini .tx{flex:1;min-width:0}
+.mini .tx b{margin:0;font-size:13px}
+.mini button{font-size:20px;padding:6px 8px}
+.nav{display:flex;justify-content:space-around;padding:8px 6px 18px;background:#1d1730;border-top:1px solid #2f2748}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:#a79fc2;padding:4px 10px}
+.nav button span{font-size:21px}
+.nav button.on{color:#ff8fa8;font-weight:700}
+.plh{text-align:center}
+.plh h1{margin:0;font-size:24px}
+.go{background:linear-gradient(90deg,#ff6f91,#ffb86b)!important;color:#2a1020!important;font-weight:700;padding:11px 28px;border-radius:99px;margin:12px 0}
+.player{padding-top:0}
+.pl-ctl{display:flex;justify-content:center;align-items:center;gap:26px;margin:18px 0;font-size:30px}
+.pl-ctl .pp{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#ff6f91,#ffb86b)!important;color:#2a1020}
+.bar{height:5px;border-radius:9px;background:#3a3156;margin:14px 0 4px}
+.bar i{display:block;width:36%;height:100%;border-radius:9px;background:#ff8fa8}
+.pl-acts{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.pl-acts button{font-size:26px;padding:4px 10px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid #2f2748;cursor:pointer}
+.opt small{display:block;color:#a79fc2;font-size:12px}
+.opt.on b{color:#ff8fa8}
+.sw{width:44px;height:26px;border-radius:99px;background:#3a3156;position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:#ff6f91}.sw.on::after{left:21px}
+.shade{position:absolute;inset:0;background:#0009;z-index:5}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#241c38;border-radius:22px 22px 0 0;padding:16px 18px 28px}
+.sh-h{display:flex;gap:12px;align-items:center;padding-bottom:10px;border-bottom:1px solid #2f2748}
+.modal{position:absolute;z-index:6;left:24px;right:24px;top:30%;background:#241c38;border-radius:20px;padding:20px}
+.modal h3{margin:0 0 12px}
+.modal input{width:100%;font:inherit;padding:11px 12px;border-radius:10px;border:2px solid #3a3156;background:#15111f;color:#fff;outline:0}
+.modal div{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.modal button{padding:9px 18px;border-radius:99px;background:#2b2342;font-weight:600}
+.modal button+button{background:linear-gradient(90deg,#ff6f91,#ffb86b);color:#2a1020}
+.toast{position:absolute;z-index:7;left:50%;bottom:110px;transform:translateX(-50%);background:#f4f0ff;color:#241f3d;padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ================= PORTADA ================= -->
+<section id="landing">
+  <p class="lbl">Test de usuario moderado</p>
+  <h1>Tempo · app de música</h1>
+  <p>Prototipo clicable de una app móvil de música y panel de moderador para comprobar si la interfaz es intuitiva y si los participantes saben dónde está cada apartado (Inicio, Buscar, Descubrir, Biblioteca, Ajustes).</p>
+  <ol>
+    <li>Abre el <b>panel del moderador</b> en una ventana o pantalla aparte.</li>
+    <li>Abre el <b>prototipo</b> en otra ventana y déjala delante del participante.</li>
+    <li>Lee cada tarea en voz alta, pulsa <b>Iniciar</b> y observa. El panel registra toques, pantallas visitadas y tiempo.</li>
+    <li>Marca el resultado, la facilidad percibida y tus notas. Al final descarga los datos.</li>
+  </ol>
+  <div class="cta">
+    <a class="btn" href="#moderador" target="_blank" rel="noopener">Soy moderador</a>
+    <a class="btn alt" href="#participante" target="_blank" rel="noopener">Abrir prototipo</a>
+  </div>
+  <p class="note">Las dos ventanas se comunican solas si están en el mismo navegador y en el mismo equipo. Si el participante usa otro dispositivo, el panel funciona igualmente en modo manual (cronómetro, resultado y notas), pero no registra los toques.</p>
+</section>
+
+<!-- ================= PROTOTIPO ================= -->
+<section id="pView" hidden><div class="phone"><div id="app"></div></div></section>
+
+<!-- ================= MODERADOR ================= -->
+<section id="mView" hidden>
+  <div class="mhead">
+    <h1>Panel del moderador · Tempo</h1>
+    <span class="st" id="conn">Prototipo sin conectar</span>
+  </div>
+  <div class="cols">
+    <div id="tasks"></div>
+    <aside>
+      <div class="box">
+        <h3>Participante</h3>
+        <input class="f" id="pcode" placeholder="Código (p. ej. P01)" autocomplete="off">
+        <div class="row2" style="margin-top:8px"><button id="reset">↺ Reiniciar prototipo</button></div>
+      </div>
+      <div class="box">
+        <h3>Registro en vivo</h3>
+        <div class="log" id="log"><div>Pulsa «Iniciar» en una tarea.</div></div>
+      </div>
+      <div class="box">
+        <h3>Resumen</h3>
+        <div class="kpi" id="kpi"></div>
+      </div>
+      <div class="box">
+        <h3>Preguntas finales</h3>
+        <p class="lbl" style="margin:0 0 6px">En general, ¿cuán intuitiva te ha parecido la app? (1 nada – 5 mucho)</p>
+        <div class="row2" id="intu"></div>
+        <p class="lbl" style="margin:10px 0 4px">¿Qué apartado te costó más encontrar?</p>
+        <textarea id="hard"></textarea>
+        <p class="lbl" style="margin:10px 0 4px">¿Algo confuso o con un nombre poco claro? ¿Qué cambiarías?</p>
+        <textarea id="sug"></textarea>
+      </div>
+      <div class="box">
+        <h3>Datos</h3>
+        <div class="row2"><button id="expCsv">⬇ CSV</button><button id="expJson">⬇ JSON</button><button id="newS">Nueva sesión</button></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const SCR = {home:"Inicio", search:"Buscar", discover:"Descubrir", library:"Biblioteca", playlist:"Playlist", player:"Reproductor", settings:"Ajustes"};
+
+/* ---------- Comunicación entre ventanas (mismo navegador) ---------- */
+const bus = (() => {
+  let bc = null, fn = () => {}; const seen = new Set();
+  const got = m => { if(!m || seen.has(m.id)) return; seen.add(m.id); fn(m); };
+  try { bc = new BroadcastChannel("ux-tempo"); bc.onmessage = e => got(e.data); } catch(e){}
+  addEventListener("storage", e => { if(e.key === "ux-msg" && e.newValue){ try{ got(JSON.parse(e.newValue)); }catch(x){} } });
+  return {
+    on: f => fn = f,
+    send(m){ m.id = Math.random().toString(36).slice(2); seen.add(m.id);
+      try{ bc && bc.postMessage(m); }catch(e){}
+      try{ localStorage.setItem("ux-msg", JSON.stringify(m)); }catch(e){} }
+  };
+})();
+
+/* ---------- Datos del prototipo ---------- */
+const CAT = [
+  {id:1, t:"Luz de Neón", a:"Marea Alta", gen:"Pop", h:330, g:"✦"},
+  {id:2, t:"Ciudad Dormida", a:"Verano Eléctrico", gen:"Indie", h:210, g:"☾"},
+  {id:3, t:"Nubes de Algodón", a:"Lo-Fi Lunes", gen:"Lo-fi", h:190, g:"☁"},
+  {id:4, t:"Sábado Infinito", a:"Los Cometas", gen:"Pop", h:20, g:"★"},
+  {id:5, t:"Bajo la Lluvia", a:"Aurora Sur", gen:"Indie", h:240, g:"☂"},
+  {id:6, t:"Ritmo de Medianoche", a:"DJ Calima", gen:"Electrónica", h:280, g:"◐"},
+  {id:7, t:"Cartas al Mar", a:"Marea Alta", gen:"Pop", h:200, g:"✉"},
+  {id:8, t:"Pasos Largos", a:"Kilómetro 0", gen:"Running", h:120, g:"➜"},
+  {id:9, t:"Fuego Lento", a:"Santa Brisa", gen:"Latino", h:10, g:"♨"},
+  {id:10, t:"Estrellas en el Techo", a:"Lo-Fi Lunes", gen:"Lo-fi", h:260, g:"✧"},
+  {id:11, t:"Radar", a:"Neón Norte", gen:"Electrónica", h:300, g:"◎"},
+  {id:12, t:"Domingo en Calma", a:"Aurora Sur", gen:"Indie", h:160, g:"☀"}
+];
+const GEN = [["Pop",340],["Indie",230],["Electrónica",280],["Latino",15],["Lo-fi",190],["Running",130]];
+const ARTISTS = [["Neón Norte",11],["Aurora Sur",5],["Santa Brisa",9],["Marea Alta",1]];
+const PL0 = () => ({
+  fav:{n:"Mis favoritas", s:[1,5,9], h:340},
+  lofi:{n:"Estudio lo-fi", s:[3,10,12], h:190},
+  run:{n:"Para correr", s:[8,6,11], h:130},
+  party:{n:"Fiesta", s:[4,9,6], h:30}
+});
+
+/* ---------- Tareas del test (enunciado neutro: no nombra los apartados) ---------- */
+const TASKS = [
+  {id:1, q:"Quieres escuchar la canción «Ritmo de Medianoche». ¿Cómo lo harías?",
+   hint:"Ruta esperada: Buscar → escribir → tocar la canción (también vale por una playlist).",
+   check:S => S.cur === 6},
+  {id:2, q:"Quieres abrir tu playlist «Estudio lo-fi». ¿Dónde la buscarías?",
+   hint:"Ruta esperada: Biblioteca → Playlists → Estudio lo-fi (o «Mixes para ti» en Inicio).",
+   check:S => S.screen === "playlist" && S.plId === "lofi"},
+  {id:3, q:"Te encanta la canción que está sonando y quieres guardarla como favorita.",
+   hint:"Ruta esperada: ♡ del mini-reproductor o del reproductor completo.",
+   setup:S => { S.cur = 4; S.playing = true; },
+   check:S => S.liked.has(4)},
+  {id:4, q:"Quieres encontrar música nueva que no conoces y escuchar algo. ¿Qué harías?",
+   hint:"Ruta esperada: Descubrir → Novedades de la semana → reproducir una.",
+   check:S => [11,7,2].includes(S.cur) && S.seen.has("discover")},
+  {id:5, q:"Quieres añadir la canción «Sábado Infinito» a tu playlist «Para correr».",
+   hint:"Ruta esperada: ⋯ de la canción → Añadir a una playlist → Para correr (o ⋯ desde el reproductor).",
+   check:S => S.pl.run.s.includes(4)},
+  {id:6, q:"Quieres ver todas las canciones que has marcado con «me gusta». ¿Dónde irías?",
+   hint:"Ruta esperada: Biblioteca → pestaña Canciones.",
+   setup:S => { S.liked = new Set([1,5,9]); },
+   check:S => S.screen === "library" && S.libTab === "songs"},
+  {id:7, q:"Quieres que la música suene con la mejor calidad posible. Cambia el ajuste.",
+   hint:"Ruta esperada: avatar 👤 (Inicio) → Ajustes → Calidad de audio → Alta.",
+   check:S => S.quality === "alta"},
+  {id:8, q:"Quieres crear una playlist nueva llamada «Viaje».",
+   hint:"Ruta esperada: Biblioteca → ＋ → escribir el nombre → Crear.",
+   check:S => Object.values(S.pl).some(p => norm(p.n) === "viaje")}
+];
+
+/* =====================================================
+   PROTOTIPO
+   ===================================================== */
+let S, curTask = 0, goalSent = false, lastScreen = "", pInit = false, typeT = 0;
+function fresh(){
+  S = {screen:"home", libTab:"playlists", plId:null, cur:null, playing:false, liked:new Set(), pl:PL0(),
+       quality:"normal", wifi:true, notif:true, q:"", sheet:null, modal:false, toast:"", back:"home", seen:new Set(["home"])};
+}
+const song = id => CAT.find(s => s.id === id);
+const art = (s, c = "") => `<i class="art ${c}" style="--h:${s.h}">${s.g}</i>`;
+const card = (id, pre) => { const s = song(id);
+  return `<button class="card" data-act="play:${id}" data-l="${pre}: ${esc(s.t)}">${art(s)}<b>${esc(s.t)}</b><small>${esc(s.a)}</small></button>`; };
+const row = id => { const s = song(id);
+  return `<div class="row ${S.cur === id ? "now" : ""}" data-act="play:${id}" data-l="Canción: ${esc(s.t)}">${art(s,"sm")}<div class="tx"><b>${esc(s.t)}</b><small>${esc(s.a)}</small></div><button class="dots" data-act="menu:${id}" data-l="Más opciones (⋯)" aria-label="Más opciones">⋯</button></div>`; };
+const plCard = id => { const p = S.pl[id];
+  return `<button class="card" data-act="pl:${id}" data-l="Mix: ${esc(p.n)}"><i class="art" style="--h:${p.h}">♫</i><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></button>`; };
+const plRow = id => { const p = S.pl[id];
+  return `<div class="row" data-act="pl:${id}" data-l="Playlist: ${esc(p.n)}"><i class="art sm" style="--h:${p.h}">♫</i><div class="tx"><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></div></div>`; };
+const tg = (k, n) => `<div class="opt" data-act="tg:${k}" data-l="Interruptor: ${n}"><b>${n}</b><span class="sw ${S[k] ? "on" : ""}"></span></div>`;
+const res = () => {
+  const q = norm(S.q.trim());
+  if(!q) return `<h2>Explora todo</h2><div class="tiles">${GEN.map(([n,h]) => `<button class="tile" style="--h:${h}" data-act="genre:${n}" data-l="Categoría: ${n}">${n}</button>`).join("")}</div>`;
+  const r = CAT.filter(s => norm(s.t + " " + s.a + " " + s.gen).includes(q));
+  return r.length ? r.map(s => row(s.id)).join("") : `<p class="empty">Sin resultados para «${esc(S.q)}»</p>`;
+};
+
+const V = {
+  home: () => `<header class="top"><h1>Buenas tardes</h1><button class="av" data-act="go:settings" data-l="Perfil (avatar)" aria-label="Perfil">👤</button></header>
+    <h2>Escuchado recientemente</h2><div class="hs">${[2,5,8].map(i => card(i,"Reciente")).join("")}</div>
+    <h2>Mixes para ti</h2><div class="hs">${["lofi","run","party"].map(plCard).join("")}</div>`,
+  search: () => `<header class="top"><h1>Buscar</h1></header>
+    <div class="sb"><span>🔍</span><input id="q" value="${esc(S.q)}" placeholder="¿Qué quieres escuchar?" autocomplete="off"></div><div id="res">${res()}</div>`,
+  discover: () => `<header class="top"><h1>Descubrir</h1></header>
+    <h2>Novedades de la semana</h2><div class="hs">${[11,7,2].map(i => card(i,"Novedad")).join("")}</div>
+    <h2>Artistas para ti</h2><div class="hs">${ARTISTS.map(([n,id]) => `<button class="card" data-act="play:${id}" data-l="Artista: ${n}"><i class="art round" style="--h:${song(id).h}">${n[0]}</i><b>${n}</b></button>`).join("")}</div>
+    <h2>Según tu ánimo</h2><div class="chips">${[["lofi","Concentración"],["run","Entrenar"],["party","Fiesta"]].map(([k,n]) => `<button data-act="pl:${k}" data-l="Ánimo: ${n}">${n}</button>`).join("")}</div>`,
+  library: () => { const t = S.libTab; let body;
+    if(t === "playlists") body = Object.keys(S.pl).map(plRow).join("");
+    else if(t === "songs"){ const l = [...S.liked]; body = l.length ? `<p class="sub">Canciones que te gustan</p>` + l.map(row).join("") : `<p class="empty">Aún no has marcado ninguna canción con ♡</p>`; }
+    else body = ARTISTS.map(([n,id]) => `<div class="row" data-act="play:${id}" data-l="Artista: ${n}"><i class="art sm round" style="--h:${song(id).h}">${n[0]}</i><div class="tx"><b>${n}</b><small>Artista</small></div></div>`).join("");
+    const tabs = [["playlists","Playlists"],["songs","Canciones"],["artists","Artistas"]].map(([k,n]) => `<button class="${t === k ? "on" : ""}" data-act="libtab:${k}" data-l="Pestaña: ${n}">${n}</button>`).join("");
+    return `<header class="top"><h1>Tu biblioteca</h1><button class="av" data-act="newpl" data-l="Nueva playlist (＋)" aria-label="Nueva playlist">＋</button></header><div class="tabs">${tabs}</div>${body}`; },
+  playlist: () => { const p = S.pl[S.plId];
+    return `<header class="top"><button class="av" data-act="back" data-l="Atrás" aria-label="Atrás">‹</button><span></span></header>
+    <div class="plh"><i class="art big" style="--h:${p.h}">♫</i><h1>${esc(p.n)}</h1><small style="color:#a79fc2">${p.s.length} canciones</small><br>
+    ${p.s.length ? `<button class="go" data-act="playpl:${S.plId}" data-l="Reproducir playlist">▶ Reproducir</button>` : ""}</div>
+    ${p.s.length ? p.s.map(row).join("") : `<p class="empty" style="text-align:center">Esta playlist está vacía</p>`}`; },
+  player: () => { const s = song(S.cur);
+    return `<header class="top"><button class="av" data-act="back" data-l="Cerrar reproductor (⌄)" aria-label="Cerrar">⌄</button><small style="color:#a79fc2">Reproduciendo</small><button class="av" data-act="menu:cur" data-l="Más opciones (⋯)" aria-label="Más opciones">⋯</button></header>
+    ${art(s,"big")}
+    <div class="pl-acts"><div class="tx"><b style="font-size:20px">${esc(s.t)}</b><small style="font-size:14px">${esc(s.a)}</small></div>
+      <button data-act="like" data-l="Me gusta (reproductor)" aria-label="Me gusta">${S.liked.has(s.id) ? "♥" : "♡"}</button></div>
+    <div class="bar"><i></i></div>
+    <div class="pl-ctl"><button data-act="prev" data-l="Anterior">⏮</button><button class="pp" data-act="toggle" data-l="Play/Pausa">${S.playing ? "⏸" : "▶"}</button><button data-act="next" data-l="Siguiente">⏭</button></div>`; },
+  settings: () => `<header class="top"><button class="av" data-act="back" data-l="Atrás" aria-label="Atrás">‹</button><h1>Ajustes</h1><span style="width:40px"></span></header>
+    <h2>Calidad de audio</h2>${[["normal","Normal","Ahorra datos"],["alta","Alta","Mejor sonido, más datos"]].map(([k,n,d]) =>
+      `<div class="opt ${S.quality === k ? "on" : ""}" data-act="q:${k}" data-l="Calidad: ${n}"><div><b>${n}</b><small>${d}</small></div><span>${S.quality === k ? "●" : "○"}</span></div>`).join("")}
+    <h2>Reproducción</h2>${tg("wifi","Descargar solo con wifi")}${tg("notif","Notificaciones")}`
+};
+const mini = () => { if(S.cur == null) return ""; const s = song(S.cur);
+  return `<div class="mini" data-act="player" data-l="Mini-reproductor">${art(s,"sm")}<div class="tx"><b>${esc(s.t)}</b><small>${esc(s.a)}</small></div>
+    <button data-act="like" data-l="Me gusta (mini)" aria-label="Me gusta">${S.liked.has(s.id) ? "♥" : "♡"}</button>
+    <button data-act="toggle" data-l="Play/Pausa (mini)" aria-label="Play o pausa">${S.playing ? "⏸" : "▶"}</button></div>`; };
+const nav = () => { const on = {home:"home", search:"search", discover:"discover", library:"library", playlist:"library"}[S.screen];
+  return `<nav class="nav">${[["home","⌂","Inicio"],["search","⌕","Buscar"],["discover","✧","Descubrir"],["library","▤","Biblioteca"]].map(([k,i,n]) =>
+    `<button class="${on === k ? "on" : ""}" data-act="go:${k}" data-l="Pestaña: ${n}"><span>${i}</span>${n}</button>`).join("")}</nav>`; };
+const sheet = () => { const sh = S.sheet, s = song(sh.id); let b;
+  if(sh.t === "song") b = `<div class="opt" data-act="likeid:${s.id}" data-l="Me gusta (menú)">${S.liked.has(s.id) ? "♥ Quitar de favoritas" : "♡ Me gusta"}</div><div class="opt" data-act="addmenu:${s.id}" data-l="Añadir a una playlist (menú)">➕ Añadir a una playlist</div>`;
+  else b = Object.keys(S.pl).map(k => `<div class="opt" data-act="addto:${s.id}:${k}" data-l="Playlist destino: ${esc(S.pl[k].n)}"><b>${esc(S.pl[k].n)}</b><span>${S.pl[k].s.includes(s.id) ? "✓" : ""}</span></div>`).join("");
+  return `<div class="shade" data-act="close" data-l="Cerrar menú"></div><div class="sheet"><div class="sh-h">${art(s,"sm")}<div class="tx"><b>${esc(s.t)}</b><small>${esc(s.a)}</small></div></div>${b}</div>`; };
+const modal = () => `<div class="shade"></div><div class="modal"><h3>Nueva playlist</h3><input id="npn" placeholder="Nombre de la playlist" autocomplete="off" maxlength="30"><div><button data-act="close" data-l="Cancelar">Cancelar</button><button data-act="create" data-l="Crear">Crear</button></div></div>`;
+
+function render(){
+  const v = $(".view"), st = v ? v.scrollTop : 0, same = lastScreen === S.screen; lastScreen = S.screen;
+  const full = S.screen === "player";
+  $("#app").innerHTML = `<div class="sbar"><span>9:41</span><span>●●● 5G ▮</span></div><div class="view ${S.screen}">${V[S.screen]()}</div>${full ? "" : mini() + nav()}${S.sheet ? sheet() : ""}${S.modal ? modal() : ""}${S.toast ? `<div class="toast">${esc(S.toast)}</div>` : ""}`;
+  if(same) $(".view").scrollTop = st;
+  if(S.modal){ const i = $("#npn"); if(i) i.focus(); }
+  if(curTask && !goalSent && TASKS.find(t => t.id === curTask).check(S)){ goalSent = true; bus.send({t:"goal", task:curTask}); }
+}
+function toast(m){ S.toast = m; setTimeout(() => { S.toast = ""; const t = $(".toast"); if(t) t.remove(); }, 1700); }
+function act(a){
+  const [k, x, y] = a.split(":");
+  switch(k){
+    case "go": S.screen = x; S.seen.add(x); S.sheet = null; break;
+    case "libtab": S.libTab = x; break;
+    case "pl": S.plId = x; S.screen = "playlist"; S.seen.add("playlist"); break;
+    case "play": S.cur = +x; S.playing = true; break;
+    case "playpl": S.cur = S.pl[x].s[0]; S.playing = true; break;
+    case "toggle": S.playing = !S.playing; break;
+    case "next": case "prev": { const i = CAT.findIndex(s => s.id === S.cur), d = k === "next" ? 1 : -1;
+      S.cur = CAT[(i + d + CAT.length) % CAT.length].id; S.playing = true; break; }
+    case "like": S.liked.has(S.cur) ? S.liked.delete(S.cur) : S.liked.add(S.cur); break;
+    case "likeid": { const id = +x; S.liked.has(id) ? S.liked.delete(id) : S.liked.add(id); S.sheet = null; break; }
+    case "player": S.back = S.screen; S.screen = "player"; S.seen.add("player"); break;
+    case "back": S.screen = S.screen === "player" ? S.back : S.screen === "playlist" ? "library" : "home"; break;
+    case "genre": S.q = x; break;
+    case "menu": S.sheet = {t:"song", id: x === "cur" ? S.cur : +x}; break;
+    case "addmenu": S.sheet = {t:"add", id:+x}; break;
+    case "addto": { const p = S.pl[y]; if(!p.s.includes(+x)) p.s.push(+x); S.sheet = null; toast("Añadida a «" + p.n + "»"); break; }
+    case "close": S.sheet = null; S.modal = false; break;
+    case "newpl": S.modal = true; break;
+    case "create": { const n = ($("#npn").value || "").trim(); if(!n) return;
+      S.pl["u" + Date.now()] = {n, s:[], h:260}; S.modal = false; toast("Playlist creada"); break; }
+    case "q": S.quality = x; break;
+    case "tg": S[x] = !S[x]; break;
+  }
+  render();
+}
+function startTask(id){
+  fresh(); curTask = id; goalSent = false;
+  const t = TASKS.find(t => t.id === id); if(t && t.setup) t.setup(S);
+  render();
+}
+function initP(){
+  if(pInit) return; pInit = true; fresh(); render();
+  $("#app").addEventListener("click", e => {
+    const el = e.target.closest("[data-act]");
+    if(!el){ if(!e.target.closest("input")) bus.send({t:"miss", task:curTask, screen:S.screen}); return; }
+    const label = el.dataset.l || el.textContent.trim().slice(0, 30);
+    act(el.dataset.act);
+    bus.send({t:"ev", task:curTask, screen:S.screen, label});
+  });
+  $("#app").addEventListener("input", e => {
+    if(e.target.id !== "q") return;
+    S.q = e.target.value; $("#res").innerHTML = res();
+    clearTimeout(typeT); typeT = setTimeout(() => bus.send({t:"ev", task:curTask, screen:S.screen, label:"Escribe en el buscador: «" + S.q + "»"}), 800);
+  });
+  bus.on(m => {
+    if(m.t === "start") startTask(m.task);
+    else if(m.t === "reset"){ fresh(); curTask = 0; render(); }
+    else if(m.t === "stop") curTask = 0;
+  });
+  const hi = () => bus.send({t:"hello"}); hi(); setInterval(hi, 2000);
+}
+
+/* =====================================================
+   PANEL DEL MODERADOR
+   ===================================================== */
+let ses, mInit = false, lastHello = 0, logLen = -1;
+try { ses = JSON.parse(localStorage.getItem("ux-ses")); } catch(e){}
+ses = ses || {p:"", tasks:{}, final:{intu:0, hard:"", sug:""}, active:0, lastId:0};
+const K = id => ses.tasks[id] || (ses.tasks[id] = {start:0, end:0, goal:0, res:"", seq:0, notes:"", taps:0, miss:0, scr:[], log:[]});
+const save = () => { try{ localStorage.setItem("ux-ses", JSON.stringify(ses)); }catch(e){} };
+const fmt = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+
+function startM(id){
+  if(ses.active && ses.active !== id){ const p = K(ses.active); if(!p.end) p.end = Date.now(); }
+  Object.assign(K(id), {start:Date.now(), end:0, goal:0, taps:0, miss:0, scr:[], log:[], res:""});
+  ses.active = id; ses.lastId = id; bus.send({t:"start", task:id}); save();
+}
+function finish(id, r){
+  const k = K(id); if(!k.start) k.start = Date.now(); if(!k.end) k.end = Date.now(); k.res = r;
+  if(ses.active === id){ ses.active = 0; bus.send({t:"stop"}); } save();
+}
+function csv(){
+  const H = ["participante","tarea","enunciado","resultado","t_objetivo_s","t_total_s","toques","toques_en_vacio","pantallas","facilidad_1_5","notas"];
+  const R = TASKS.map(t => { const k = ses.tasks[t.id] || {};
+    return [ses.p, t.id, t.q, k.res || "", k.goal ? ((k.goal - k.start) / 1000).toFixed(1) : "", k.end ? ((k.end - k.start) / 1000).toFixed(1) : "", k.taps || 0, k.miss || 0, (k.scr || []).length, k.seq || "", k.notes || ""]; });
+  R.push([ses.p, "final", "Intuitiva en general (1-5)", ses.final.intu || "", "", "", "", "", "", "", "Más difícil de encontrar: " + ses.final.hard + " | Sugerencias: " + ses.final.sug]);
+  return "\ufeff" + [H, ...R].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
+}
+function dl(name, txt, type){ const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], {type})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500); }
+
+function initM(){
+  if(mInit) return; mInit = true;
+  $("#tasks").innerHTML = TASKS.map(t => `<section class="tk" id="tk${t.id}" data-id="${t.id}">
+    <header><span class="n">${t.id}</span><p class="q">${esc(t.q)}</p></header>
+    <p class="hint">${esc(t.hint)}</p>
+    <div class="ctl"><button data-a="start">▶ Iniciar</button><span class="tm">0:00</span><span class="goal" hidden></span></div>
+    <div class="stat"></div>
+    <div class="res"><button data-r="ok">✅ Éxito</button><button data-r="help">🟡 Con ayuda</button><button data-r="fail">❌ Fallo</button></div>
+    <div class="seq"><span class="lbl">Facilidad percibida:</span>${[1,2,3,4,5].map(n => `<button data-s="${n}">${n}</button>`).join("")}</div>
+    <textarea placeholder="Observaciones: dudas, comentarios en voz alta, errores…">${esc(K(t.id).notes)}</textarea></section>`).join("");
+  $("#tasks").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    const id = +b.closest(".tk").dataset.id;
+    if(b.dataset.a === "start") startM(id);
+    else if(b.dataset.r) finish(id, b.dataset.r);
+    else if(b.dataset.s) K(id).seq = +b.dataset.s;
+    save(); upd();
+  });
+  $("#tasks").addEventListener("input", e => { if(e.target.matches("textarea")){ K(+e.target.closest(".tk").dataset.id).notes = e.target.value; save(); } });
+  $("#pcode").value = ses.p; $("#pcode").oninput = e => { ses.p = e.target.value; save(); };
+  $("#intu").innerHTML = [1,2,3,4,5].map(n => `<button data-i="${n}">${n}</button>`).join("");
+  $("#intu").onclick = e => { const b = e.target.closest("button"); if(b){ ses.final.intu = +b.dataset.i; save(); upd(); } };
+  $("#hard").value = ses.final.hard; $("#hard").oninput = e => { ses.final.hard = e.target.value; save(); };
+  $("#sug").value = ses.final.sug; $("#sug").oninput = e => { ses.final.sug = e.target.value; save(); };
+  $("#reset").onclick = () => bus.send({t:"reset"});
+  $("#expCsv").onclick = () => dl("ux-tempo-" + (ses.p || "sesion") + ".csv", csv(), "text/csv;charset=utf-8");
+  $("#expJson").onclick = () => dl("ux-tempo-" + (ses.p || "sesion") + ".json", JSON.stringify(ses, null, 2), "application/json");
+  $("#newS").onclick = () => { if(!confirm("¿Empezar una sesión nueva? Descarga antes los datos de esta.")) return;
+    try{ localStorage.removeItem("ux-ses"); }catch(e){} location.reload(); };
+  bus.on(m => {
+    if(m.t === "hello"){ lastHello = Date.now(); return; }
+    const a = ses.active; if(!a || m.task !== a) return; const k = K(a), t = Date.now() - k.start;
+    if(m.t === "ev"){ k.taps++; if(!k.scr.includes(m.screen)) k.scr.push(m.screen); k.log.push([t, m.screen, m.label]); }
+    else if(m.t === "miss"){ k.miss++; k.log.push([t, m.screen, "(toque en una zona sin función)"]); }
+    else if(m.t === "goal" && !k.goal){ k.goal = Date.now(); k.log.push([t, m.screen || "", "🎯 Objetivo alcanzado"]); }
+    save(); upd();
+  });
+  setInterval(upd, 250); upd();
+}
+function upd(){
+  const now = Date.now();
+  TASKS.forEach(t => {
+    const k = ses.tasks[t.id] || {}, el = $("#tk" + t.id), on = ses.active === t.id;
+    el.classList.toggle("act", on);
+    el.querySelector(".tm").textContent = fmt(k.start ? (k.end || now) - k.start : 0);
+    const g = el.querySelector(".goal"); g.hidden = !k.goal; if(k.goal) g.textContent = "🎯 Objetivo alcanzado a los " + fmt(k.goal - k.start);
+    el.querySelector('[data-a="start"]').textContent = on ? "⟳ Reiniciar" : (k.start ? "▶ Repetir" : "▶ Iniciar");
+    el.querySelector(".stat").textContent = `${k.taps || 0} toques · ${k.miss || 0} en vacío · ${(k.scr || []).length} pantallas`;
+    el.querySelectorAll("[data-r]").forEach(b => b.classList.toggle("on", k.res === b.dataset.r));
+    el.querySelectorAll("[data-s]").forEach(b => b.classList.toggle("on", k.seq === +b.dataset.s));
+  });
+  const c = now - lastHello < 6000; $("#conn").classList.toggle("on", c);
+  $("#conn").textContent = c ? "● Prototipo conectado" : "Prototipo sin conectar (modo manual)";
+  $("#intu").querySelectorAll("button").forEach(b => b.classList.toggle("on", ses.final.intu === +b.dataset.i));
+  const ks = TASKS.map(t => ses.tasks[t.id] || {}), done = ks.filter(k => k.res), ok = ks.filter(k => k.res === "ok").length, hp = ks.filter(k => k.res === "help").length;
+  const sq = ks.filter(k => k.seq), avg = sq.length ? (sq.reduce((a, k) => a + k.seq, 0) / sq.length).toFixed(1) : "–";
+  $("#kpi").innerHTML = `<span>Tareas: <b>${done.length}/${TASKS.length}</b></span><span>Éxito: <b>${done.length ? Math.round(ok / done.length * 100) : 0} %</b></span><span>Con ayuda: <b>${hp}</b></span><span>Facilidad media: <b>${avg}</b></span><span>Toques en vacío: <b>${ks.reduce((a, k) => a + (k.miss || 0), 0)}</b></span>`;
+  const id = ses.active || ses.lastId, lg = id ? K(id).log : [];
+  if(lg.length !== logLen){ logLen = lg.length;
+    $("#log").innerHTML = lg.length ? lg.map(([t, s, l]) => `<div>${fmt(t)} · ${SCR[s] || s || "–"} › ${esc(l)}</div>`).join("") : "<div>Pulsa «Iniciar» en una tarea.</div>";
+    $("#log").scrollTop = 1e6; }
+}
+
+/* ---------- Rutas ---------- */
+function route(){
+  const h = location.hash, p = h === "#participante", m = h === "#moderador";
+  $("#landing").hidden = p || m; $("#pView").hidden = !p; $("#mView").hidden = !m;
+  document.title = p ? "Tempo" : m ? "Moderador · Tempo" : "Test de usuario · Tempo";
+  if(p) initP(); if(m) initM();
+}
+addEventListener("hashchange", route); route();
+</script>
+</body>
+</html>
