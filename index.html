@@ -132,6 +132,20 @@ aside{position:sticky;top:12px}
 .modal button+button{background:var(--mg);color:#fff}
 .toast{position:absolute;z-index:7;left:50%;bottom:130px;transform:translateX(-50%);background:#fff;color:#000;padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;white-space:nowrap}
 .phone .lk{color:var(--mgl)}
+/* ---- Magenta como color secundario ---- */
+.phone h2{display:flex;align-items:center;gap:8px}
+.phone h2::before{content:"";width:4px;height:16px;border-radius:3px;background:var(--mg)}
+.av{box-shadow:inset 0 0 0 2px var(--mg)}
+.brand{display:block;font-weight:800;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mgl);margin-bottom:2px}
+.top h1{font-size:24px;line-height:1.15}
+.nav button{position:relative}
+.nav button.on::before{content:"";position:absolute;top:-9px;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--mg)}
+.mini{position:relative;box-shadow:inset 0 0 0 1px #e4007c66}
+.mini::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--mg) 36%,#333 36%)}
+.art.mg{background:linear-gradient(135deg,#e4007c,#3d0027)}
+.sb:focus-within{box-shadow:inset 0 0 0 2px var(--mg)}
+.chips button{box-shadow:inset 0 0 0 1px #e4007c88}
+.tabs button:not(.on){box-shadow:inset 0 0 0 1px #333}
 </style>
 </head>
 <body>
@@ -169,6 +183,7 @@ aside{position:sticky;top:12px}
       <div class="box">
         <h3>Participante</h3>
         <input class="f" id="pcode" placeholder="Código (p. ej. P01)" autocomplete="off">
+        <input class="f" id="pname" placeholder="Nombre para el saludo (no se exporta)" autocomplete="off" maxlength="24" style="margin-top:8px">
         <div class="row2" style="margin-top:8px"><button id="reset">↺ Reiniciar prototipo</button></div>
       </div>
       <div class="box">
@@ -273,7 +288,7 @@ const TASKS = [
 /* =====================================================
    PROTOTIPO
    ===================================================== */
-let S, curTask = 0, goalSent = false, lastScreen = "", pInit = false, typeT = 0;
+let S, curTask = 0, goalSent = false, lastScreen = "", pInit = false, typeT = 0, userName = "";
 function fresh(){
   S = {screen:"home", libTab:"playlists", plId:null, cur:null, playing:false, liked:new Set(), pl:PL0(),
        quality:"normal", wifi:true, notif:true, q:"", sheet:null, modal:false, toast:"", back:"home", seen:new Set(["home"])};
@@ -285,9 +300,9 @@ const card = (id, pre) => { const s = song(id);
 const row = id => { const s = song(id);
   return `<div class="row ${S.cur === id ? "now" : ""}" data-act="play:${id}" data-l="Canción: ${esc(s.t)}">${art(s,"sm")}<div class="tx"><b>${esc(s.t)}</b><small>${esc(s.a)}</small></div><button class="dots" data-act="menu:${id}" data-l="Más opciones (⋯)" aria-label="Más opciones">⋯</button></div>`; };
 const plCard = id => { const p = S.pl[id];
-  return `<button class="card" data-act="pl:${id}" data-l="Mix: ${esc(p.n)}"><i class="art" style="--h:${p.h}">♫</i><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></button>`; };
+  return `<button class="card" data-act="pl:${id}" data-l="Mix: ${esc(p.n)}"><i class="art mg" style="--h:${p.h}">♫</i><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></button>`; };
 const plRow = id => { const p = S.pl[id];
-  return `<div class="row" data-act="pl:${id}" data-l="Playlist: ${esc(p.n)}"><i class="art sm" style="--h:${p.h}">♫</i><div class="tx"><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></div></div>`; };
+  return `<div class="row" data-act="pl:${id}" data-l="Playlist: ${esc(p.n)}"><i class="art sm mg" style="--h:${p.h}">♫</i><div class="tx"><b>${esc(p.n)}</b><small>${p.s.length} canciones</small></div></div>`; };
 const tg = (k, n) => `<div class="opt" data-act="tg:${k}" data-l="Interruptor: ${n}"><b>${n}</b><span class="sw ${S[k] ? "on" : ""}"></span></div>`;
 const res = () => {
   const q = norm(S.q.trim());
@@ -297,7 +312,7 @@ const res = () => {
 };
 
 const V = {
-  home: () => `<header class="top"><h1>Buenas tardes</h1><button class="av" data-act="go:settings" data-l="Perfil (avatar)" aria-label="Perfil">👤</button></header>
+  home: () => `<header class="top"><div><span class="brand">tempo</span><h1>Buenos días${userName ? ", " + esc(userName) : ""}</h1></div><button class="av" data-act="go:settings" data-l="Perfil (avatar)" aria-label="Perfil">👤</button></header>
     <h2>Escuchado recientemente</h2><div class="hs">${[2,5,8].map(i => card(i,"Reciente")).join("")}</div>
     <h2>Mixes para ti</h2><div class="hs">${["lofi","run","party"].map(plCard).join("")}</div>`,
   search: () => `<header class="top"><h1>Buscar</h1></header>
@@ -314,7 +329,7 @@ const V = {
     return `<header class="top"><h1>Tu biblioteca</h1><button class="av" data-act="newpl" data-l="Nueva playlist (＋)" aria-label="Nueva playlist">＋</button></header><div class="tabs">${tabs}</div>${body}`; },
   playlist: () => { const p = S.pl[S.plId];
     return `<header class="top"><button class="av" data-act="back" data-l="Atrás" aria-label="Atrás">‹</button><span></span></header>
-    <div class="plh"><i class="art big" style="--h:${p.h}">♫</i><h1>${esc(p.n)}</h1><small style="color:#9b9b9b">${p.s.length} canciones</small><br>
+    <div class="plh"><i class="art big mg" style="--h:${p.h}">♫</i><h1>${esc(p.n)}</h1><small style="color:#9b9b9b">${p.s.length} canciones</small><br>
     ${p.s.length ? `<button class="go" data-act="playpl:${S.plId}" data-l="Reproducir playlist">▶ Reproducir</button>` : ""}</div>
     ${p.s.length ? p.s.map(row).join("") : `<p class="empty" style="text-align:center">Esta playlist está vacía</p>`}`; },
   player: () => { const s = song(S.cur);
@@ -391,7 +406,7 @@ function fit(){
   ph.style.transform = `scale(${k})`; st.style.width = 402 * k + "px"; st.style.height = 874 * k + "px";
 }
 function initP(){
-  if(pInit) return; pInit = true; fresh(); render(); fit(); addEventListener("resize", fit);
+  if(pInit) return; pInit = true; userName = ses.name || ""; fresh(); render(); fit(); addEventListener("resize", fit);
   $("#app").addEventListener("click", e => {
     const el = e.target.closest("[data-act]");
     if(!el){ if(!e.target.closest("input")) bus.send({t:"miss", task:curTask, screen:S.screen}); return; }
@@ -408,6 +423,7 @@ function initP(){
     if(m.t === "start") startTask(m.task);
     else if(m.t === "reset"){ fresh(); curTask = 0; render(); }
     else if(m.t === "stop") curTask = 0;
+    else if(m.t === "name"){ userName = m.name || ""; if(S.screen === "home") render(); }
   });
   const hi = () => bus.send({t:"hello"}); hi(); setInterval(hi, 2000);
 }
@@ -460,17 +476,18 @@ function initM(){
   });
   $("#tasks").addEventListener("input", e => { if(e.target.matches("textarea")){ K(+e.target.closest(".tk").dataset.id).notes = e.target.value; save(); } });
   $("#pcode").value = ses.p; $("#pcode").oninput = e => { ses.p = e.target.value; save(); };
+  $("#pname").value = ses.name || ""; $("#pname").oninput = e => { ses.name = e.target.value.trim(); save(); bus.send({t:"name", name:ses.name}); };
   $("#intu").innerHTML = [1,2,3,4,5].map(n => `<button data-i="${n}">${n}</button>`).join("");
   $("#intu").onclick = e => { const b = e.target.closest("button"); if(b){ ses.final.intu = +b.dataset.i; save(); upd(); } };
   $("#hard").value = ses.final.hard; $("#hard").oninput = e => { ses.final.hard = e.target.value; save(); };
   $("#sug").value = ses.final.sug; $("#sug").oninput = e => { ses.final.sug = e.target.value; save(); };
   $("#reset").onclick = () => bus.send({t:"reset"});
   $("#expCsv").onclick = () => dl("ux-tempo-" + (ses.p || "sesion") + ".csv", csv(), "text/csv;charset=utf-8");
-  $("#expJson").onclick = () => dl("ux-tempo-" + (ses.p || "sesion") + ".json", JSON.stringify(ses, null, 2), "application/json");
+  $("#expJson").onclick = () => dl("ux-tempo-" + (ses.p || "sesion") + ".json", JSON.stringify({...ses, name:undefined}, null, 2), "application/json");
   $("#newS").onclick = () => { if(!confirm("¿Empezar una sesión nueva? Descarga antes los datos de esta.")) return;
     try{ localStorage.removeItem("ux-ses"); }catch(e){} location.reload(); };
   bus.on(m => {
-    if(m.t === "hello"){ lastHello = Date.now(); return; }
+    if(m.t === "hello"){ const was = Date.now() - lastHello < 6000; lastHello = Date.now(); if(!was && ses.name) bus.send({t:"name", name:ses.name}); return; }
     const a = ses.active; if(!a || m.task !== a) return; const k = K(a), t = Date.now() - k.start;
     if(m.t === "ev"){ k.taps++; if(!k.scr.includes(m.screen)) k.scr.push(m.screen); k.log.push([t, m.screen, m.label]); }
     else if(m.t === "miss"){ k.miss++; k.log.push([t, m.screen, "(toque en una zona sin función)"]); }
